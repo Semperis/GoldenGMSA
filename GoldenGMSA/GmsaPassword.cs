@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using static GoldengMSA.GetKey;
 
 namespace GoldengMSA
 {
     class GmsaPassword
     {
-        public static void ParseSIDKeyResult(GROUP_KEY_ENVELOPE GKE, int GKESize, byte[] MsdsManagedPasswordID, out byte[] L1Key, ref int L1KeyIDDiff, ref int NewL1KeyID,
+        public static void ParseSIDKeyResult(Group_Key_Envelope GKE, int GKESize, byte[] MsdsManagedPasswordID, out byte[] L1Key, ref int L1KeyIDDiff, ref int NewL1KeyID,
             out byte[] L2Key, ref int L2KeyIDDiff, ref int NewL2KeyID, out byte[] PublicKey)
         {
             NewL2KeyID = 31;
@@ -61,7 +60,7 @@ namespace GoldengMSA
             PublicKey = null;
         }
 
-        public static void ClientComputeL2Key(GROUP_KEY_ENVELOPE GKE, byte[] MsdsManagedPasswordID, string KDFAlgorithmID, byte[] L1Key, ref byte[] L2Key,
+        public static void ClientComputeL2Key(Group_Key_Envelope GKE, byte[] MsdsManagedPasswordID, string KDFAlgorithmID, byte[] L1Key, ref byte[] L2Key,
             int L1KeyDiff, int NewL1KeyID, int L2KeyDiff, int NewL2KeyID)
         {
             Msds_ManagedPasswordID msds_ManagedPasswordID = new Msds_ManagedPasswordID(MsdsManagedPasswordID);
@@ -136,7 +135,7 @@ namespace GoldengMSA
             }
         }
 
-        public static void GenerateGMSAPassowrd(GROUP_KEY_ENVELOPE GKE, int GKESize, byte[] MsdsManagedPasswordID, byte[] SID, IntPtr OutOpt, IntPtr OutOptSize, out byte[] PasswordBlob, int PasswordBlobSize)
+        public static void GenerateGMSAPassowrd(Group_Key_Envelope GKE, int GKESize, byte[] MsdsManagedPasswordID, byte[] SID, IntPtr OutOpt, IntPtr OutOptSize, out byte[] PasswordBlob, int PasswordBlobSize)
         {
             uint status;
             byte[] kdfParam = null;
