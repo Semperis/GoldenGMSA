@@ -1,41 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace GoldengMSA
 {
     class GetKey
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct GROUP_KEY_ENVELOPE
-        {
-            public int Version;
-            public int Reserved;
-            public int isPublicKey;
-            public int L0Index;
-            public int L1Index;
-            public int L2Index;
-            public Guid RootKeyIdentifier;
-            public int cbKDFAlgorithm;
-            public int cbKDFParameters;
-            public int cbSecretAgreementAlgorithm;
-            public int cbSecretAgreementParameters;
-            public int PrivateKeyLength;
-            public int PublicKeyLength;
-            public int cbL1Key;
-            public int cbL2Key;
-            public int cbDomainName;
-            public int cbForestName;
-            public string KDFAlgorithm;
-            public byte[] KDFParameters;
-            public string SecretAgreementAlgorithm;
-            public byte[] SecretAgreementParameters;
-            public string DomainName;
-            public string ForestName;
-            public byte[] L1Key; // 64 in size
-            public byte[] L2Key; // 64 in size
-        }
-
         public static L0_Key ComputeL0Key(Root_Key RootKey, int L0KeyID)
         {
             byte[] rootKeyGUID = RootKey.cn.ToByteArray();
@@ -182,9 +153,9 @@ namespace GoldengMSA
             return;
         }
 
-        public static void FormatReturnBlob(L0_Key L0Key, int GuidExists, byte[] L1Key, int L1KeyID, byte[] L2Key, int L2KeyID, byte[] PublicKey, int PublicKeySize, out GROUP_KEY_ENVELOPE GKE, out int GKESize, string DomainName, string ForestName)
+        public static void FormatReturnBlob(L0_Key L0Key, int GuidExists, byte[] L1Key, int L1KeyID, byte[] L2Key, int L2KeyID, byte[] PublicKey, int PublicKeySize, out Group_Key_Envelope GKE, out int GKESize, string DomainName, string ForestName)
         {
-            GKE = new GROUP_KEY_ENVELOPE();
+            GKE = new Group_Key_Envelope();
             GKE.Version = 1;
             GKE.Reserved = 1263748171;
             GKE.L0Index = (int)L0Key.L0KeyID;
@@ -259,15 +230,130 @@ namespace GoldengMSA
 
         // Original signature is GetSIDKeyLocal(byte[] SecurityDescriptor, int SDSize, int GuidFlag, Guid RootKeyGUID, int L0KeyID, int L1KeyID, int L2KeyID, int AccessCheckFailed, ref IntPtr outSomething, out byte[] GKE, out int GKESize)
         public static void GetSIDKeyLocal(byte[] SecurityDescriptor, int SDSize, Root_Key RootKey, int L0KeyID, int L1KeyID, int L2KeyID, int AccessCheckFailed,
-            out GROUP_KEY_ENVELOPE GKE, out int GKESize)
+            out Group_Key_Envelope GKE, out int GKESize, string DomainName, string ForestName)
         {
             L0_Key l0Key = ComputeL0Key(RootKey, L0KeyID);
             byte[] l1Key, l2Key;
             ComputeSIDPrivateKey(l0Key, SecurityDescriptor, SDSize, L1KeyID, L2KeyID, AccessCheckFailed, out l1Key, out l2Key);
             // There is another function that is being called if AccessCheckFailed != 0  which is ComputePublicKey - should not be relevant for us
             int guidExists = (RootKey.cn == Guid.Empty || RootKey.cn == null) ? 0 : 1;
-            FormatReturnBlob(l0Key, guidExists, l1Key, L1KeyID, l2Key, L2KeyID, null, 0, out GKE, out GKESize, Utils.domain, Utils.forest);
+            FormatReturnBlob(l0Key, guidExists, l1Key, L1KeyID, l2Key, L2KeyID, null, 0, out GKE, out GKESize, DomainName, ForestName);
         }
 
+    }
+
+    public class Group_Key_Envelope
+    {
+        public int Version { get; set; }
+        public int Reserved { get; set; }
+        public int isPublicKey { get; set; }
+        public int L0Index { get; set; }
+        public int L1Index { get; set; }
+        public int L2Index { get; set; }
+        public Guid RootKeyIdentifier { get; set; }
+        public int cbKDFAlgorithm { get; set; }
+        public int cbKDFParameters { get; set; }
+        public int cbSecretAgreementAlgorithm { get; set; }
+        public int cbSecretAgreementParameters { get; set; }
+        public int PrivateKeyLength { get; set; }
+        public int PublicKeyLength { get; set; }
+        public int cbL1Key { get; set; }
+        public int cbL2Key { get; set; }
+        public int cbDomainName { get; set; }
+        public int cbForestName { get; set; }
+        public string KDFAlgorithm { get; set; }
+        public byte[] KDFParameters { get; set; }
+        public string SecretAgreementAlgorithm { get; set; }
+        public byte[] SecretAgreementParameters { get; set; }
+        public string DomainName { get; set; }
+        public string ForestName { get; set; }
+        public byte[] L1Key { get; set; } // 64 in size
+        public byte[] L2Key { get; set; } // 64 in size
+
+        public Group_Key_Envelope (byte[] GKEBytes)
+        {
+            Version = BitConverter.ToInt32(GKEBytes, 0);
+            Reserved = BitConverter.ToInt32(GKEBytes, 4);
+            isPublicKey = BitConverter.ToInt32(GKEBytes, 8);
+            L0Index = BitConverter.ToInt32(GKEBytes, 12);
+            L1Index = BitConverter.ToInt32(GKEBytes, 16);
+            L2Index = BitConverter.ToInt32(GKEBytes, 20);
+            byte[] temp = new byte[16];
+            Array.Copy(GKEBytes, 24, temp, 0, 16);
+            RootKeyIdentifier = new Guid(temp);
+            cbKDFAlgorithm = BitConverter.ToInt32(GKEBytes, 40);
+            cbKDFParameters = BitConverter.ToInt32(GKEBytes, 44);
+            cbSecretAgreementAlgorithm = BitConverter.ToInt32(GKEBytes, 48);
+            cbSecretAgreementParameters = BitConverter.ToInt32(GKEBytes, 52);
+            PrivateKeyLength = BitConverter.ToInt32(GKEBytes, 56);
+            PublicKeyLength = BitConverter.ToInt32(GKEBytes, 60);
+            cbL1Key = BitConverter.ToInt32(GKEBytes, 64);
+            cbL2Key = BitConverter.ToInt32(GKEBytes, 68);
+            cbDomainName = BitConverter.ToInt32(GKEBytes, 72);
+            cbForestName = BitConverter.ToInt32(GKEBytes, 76);
+            KDFAlgorithm = System.Text.Encoding.Unicode.GetString(GKEBytes, 80, cbKDFAlgorithm);
+            Array.Copy(GKEBytes, 80 + cbKDFAlgorithm, KDFParameters, 0, cbKDFParameters);
+            SecretAgreementAlgorithm = System.Text.Encoding.Unicode.GetString(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters, cbSecretAgreementAlgorithm);
+            Array.Copy(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm, SecretAgreementParameters, 0, cbSecretAgreementParameters);
+            DomainName = System.Text.Encoding.Unicode.GetString(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm
+                + cbSecretAgreementParameters, cbDomainName);
+            ForestName = System.Text.Encoding.Unicode.GetString(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm
+                + cbSecretAgreementParameters + cbDomainName, cbForestName);
+            if (cbL1Key > 0)
+            {
+                Array.Copy(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm 
+                    + cbSecretAgreementParameters + cbDomainName + cbForestName, L1Key, 0, cbL1Key);
+            }
+            else
+            {
+                L1Key = null;
+            }
+            if (cbL2Key > 0)
+            {
+                Array.Copy(GKEBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm
+                    + cbSecretAgreementParameters + cbDomainName + cbForestName + cbL1Key, L2Key, 0, cbL2Key);
+            }
+            else
+            {
+                L2Key = null;
+            }
+        }
+
+        public Group_Key_Envelope()
+        {
+        }
+
+        public byte[] Serialize ()
+        {
+            int gkeSize = 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm + cbSecretAgreementParameters + cbDomainName + cbForestName + cbL1Key + cbL2Key;
+            byte[] gkeBytes = new byte[gkeSize];
+            BitConverter.GetBytes(Version).CopyTo(gkeBytes, 0);
+            BitConverter.GetBytes(Reserved).CopyTo(gkeBytes, 4);
+            BitConverter.GetBytes(isPublicKey).CopyTo(gkeBytes, 8);
+            BitConverter.GetBytes(L0Index).CopyTo(gkeBytes, 12);
+            BitConverter.GetBytes(L1Index).CopyTo(gkeBytes, 16);
+            BitConverter.GetBytes(L2Index).CopyTo(gkeBytes, 20);
+            RootKeyIdentifier.ToByteArray().CopyTo(gkeBytes, 24);
+            BitConverter.GetBytes(cbKDFAlgorithm).CopyTo(gkeBytes, 40);
+            BitConverter.GetBytes(cbKDFParameters).CopyTo(gkeBytes, 44);
+            BitConverter.GetBytes(cbSecretAgreementAlgorithm).CopyTo(gkeBytes, 48);
+            BitConverter.GetBytes(cbSecretAgreementParameters).CopyTo(gkeBytes, 52);
+            BitConverter.GetBytes(PrivateKeyLength).CopyTo(gkeBytes, 56);
+            BitConverter.GetBytes(PublicKeyLength).CopyTo(gkeBytes, 60);
+            BitConverter.GetBytes(cbL1Key).CopyTo(gkeBytes, 64);
+            BitConverter.GetBytes(cbL2Key).CopyTo(gkeBytes, 68);
+            BitConverter.GetBytes(cbDomainName).CopyTo(gkeBytes, 72);
+            BitConverter.GetBytes(cbForestName).CopyTo(gkeBytes, 76);
+            Encoding.Unicode.GetBytes(KDFAlgorithm).CopyTo(gkeBytes, 80);
+            KDFParameters.CopyTo(gkeBytes, 80 + cbKDFAlgorithm);
+            Encoding.Unicode.GetBytes(SecretAgreementAlgorithm).CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters);
+            SecretAgreementParameters.CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm);
+            Encoding.Unicode.GetBytes(DomainName).CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm + cbSecretAgreementParameters);
+            Encoding.Unicode.GetBytes(ForestName).CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm + cbSecretAgreementParameters + cbDomainName);
+            L1Key.CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm + cbSecretAgreementParameters + cbDomainName + cbForestName);
+            L1Key.CopyTo(gkeBytes, 80 + cbKDFAlgorithm + cbKDFParameters + cbSecretAgreementAlgorithm + cbSecretAgreementParameters + cbDomainName + cbForestName + cbL1Key);
+
+            return gkeBytes;
+        }
     }
 }
