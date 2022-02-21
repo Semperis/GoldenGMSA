@@ -211,14 +211,14 @@ namespace GoldenGMSA
 
         public static RootKey GetRootKeyByGuid(string forestName, Guid rootKeyId)
         {
-            using (var rootDse = Utils.GetRootDse(forestName))
+            using (var rootDse = LdapUtils.GetRootDse(forestName))
             {
                 string searchBase = rootDse.Properties["configurationNamingContext"].Value.ToString();
                 string ldapFilter = $"(&(objectClass=msKds-ProvRootKey)(cn={rootKeyId}))";
 
                 //Console.WriteLine($"searchBase={searchBase}; ldapFilter={ldapFilter}");
 
-                var results = Utils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
+                var results = LdapUtils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
 
                 if (results == null || results.Count == 0)
                     return null;
@@ -229,12 +229,12 @@ namespace GoldenGMSA
 
         public static IEnumerable<RootKey> GetAllRootKeys(string forestName)
         {
-            using (var rootDse = Utils.GetRootDse(forestName))
+            using (var rootDse = LdapUtils.GetRootDse(forestName))
             {
                 string searchBase = rootDse.Properties["configurationNamingContext"].Value.ToString();
                 string ldapFilter = $"(objectClass=msKds-ProvRootKey)";
 
-                var results = Utils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
+                var results = LdapUtils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
 
                 if (results == null || results.Count == 0)
                     yield break;

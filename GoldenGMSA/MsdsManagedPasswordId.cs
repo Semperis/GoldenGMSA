@@ -60,7 +60,7 @@ namespace GoldenGMSA
             string[] attributes = { "msds-ManagedPasswordID" };
             string ldapFilter = $"(objectSID={sid})";
 
-            var results = Utils.FindInDomain(domainName, ldapFilter, attributes);
+            var results = LdapUtils.FindInDomain(domainName, ldapFilter, attributes);
 
             if (results == null || results.Count == 0)
                 return null;

@@ -43,7 +43,7 @@ namespace GoldenGMSA
                 throw new ArgumentNullException(nameof(domainFqdn));
 
             string ldapFilter = $"(&{IsGmsaAccountLdapFilter}(objectsid={sid}))";
-            var results = Utils.FindInDomain(domainFqdn, ldapFilter, GmsaRequiredLdapAttributes);
+            var results = LdapUtils.FindInDomain(domainFqdn, ldapFilter, GmsaRequiredLdapAttributes);
 
             if (results == null || results.Count == 0)
                 return null;
@@ -58,7 +58,7 @@ namespace GoldenGMSA
                 throw new ArgumentException($"'{nameof(domainFqdn)}' cannot be null or empty.", nameof(domainFqdn));
             }
 
-            var results = Utils.FindInDomain(domainFqdn, IsGmsaAccountLdapFilter, GmsaRequiredLdapAttributes);
+            var results = LdapUtils.FindInDomain(domainFqdn, IsGmsaAccountLdapFilter, GmsaRequiredLdapAttributes);
 
             if (results == null)
                 yield break;
