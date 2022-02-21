@@ -34,6 +34,12 @@ namespace GoldenGMSA
             SamAccountName = samAccountName;
         }
 
+        /// <summary>
+        /// Returns GMSA account information given its SID
+        /// </summary>
+        /// <param name="domainFqdn">FQDN of the domain to search</param>
+        /// <param name="sid">The SID of the GMSA</param>
+        /// <returns></returns>
         public static GmsaAccount GetGmsaAccountBySid(string domainFqdn, SecurityIdentifier sid)
         {
             if (sid is null)
@@ -51,6 +57,11 @@ namespace GoldenGMSA
             return GetGmsaFromSearchResult(results[0]);
         }
 
+        /// <summary>
+        /// Returns all GMSA account in domain
+        /// </summary>
+        /// <param name="domainFqdn">FQDN of the domain to search</param>
+        /// <returns></returns>
         public static IEnumerable<GmsaAccount> FindAllGmsaAccountsInDomain(string domainFqdn)
         {
             if (string.IsNullOrEmpty(domainFqdn))

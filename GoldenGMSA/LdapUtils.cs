@@ -62,10 +62,4 @@ namespace GoldenGMSA
             return new DirectoryEntry($"LDAP://{domainName}/RootDSE");
         }
     }
-
-
-
-
-
-
 }
