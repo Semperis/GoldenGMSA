@@ -8,7 +8,7 @@ More details are available at the post [Introducing the Golden GMSA Attack](http
 
 ## Usage
 
-![image](https://user-images.githubusercontent.com/8843083/154511181-b6650659-c6d0-4fc7-a3c6-1de463b784d5.png)
+![image](images/usage.png)
 
 ### Query gMSAs in the domain (gmsainfo):
 
