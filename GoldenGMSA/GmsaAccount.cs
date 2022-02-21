@@ -113,7 +113,8 @@ namespace GoldenGMSA
             result += $"SID:\t\t\t{this.Sid}{Environment.NewLine}";
             result += $"RootKeyGuid:\t\t{this.ManagedPasswordId.RootKeyIdentifier}{Environment.NewLine}";
             result += $"msds-ManagedPasswordID:\t{Convert.ToBase64String(this.ManagedPasswordId.MsdsManagedPasswordIdBytes)}{Environment.NewLine}";
-
+            result += $"----------------------------------------------{Environment.NewLine}";
+            
             return result;
         }
     }

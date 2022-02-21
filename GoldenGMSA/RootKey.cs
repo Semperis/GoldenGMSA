@@ -208,7 +208,56 @@ namespace GoldenGMSA
             this.KdsRootKeyData = rk.KdsRootKeyData.ToArray();
         }
 
-        public byte[] Serialize()
+
+        public static RootKey GetRootKeyByGuid(string forestName, Guid rootKeyId)
+        {
+            using (var rootDse = Utils.GetRootDse(forestName))
+            {
+                string searchBase = rootDse.Properties["configurationNamingContext"].Value.ToString();
+                string ldapFilter = $"(&(objectClass=msKds-ProvRootKey)(cn={rootKeyId}))";
+
+                //Console.WriteLine($"searchBase={searchBase}; ldapFilter={ldapFilter}");
+
+                var results = Utils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
+
+                if (results == null || results.Count == 0)
+                    return null;
+
+                return new RootKey(results[0]);
+            }
+        }
+
+        public static IEnumerable<RootKey> GetAllRootKeys(string forestName)
+        {
+            using (var rootDse = Utils.GetRootDse(forestName))
+            {
+                string searchBase = rootDse.Properties["configurationNamingContext"].Value.ToString();
+                string ldapFilter = $"(objectClass=msKds-ProvRootKey)";
+
+                var results = Utils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
+
+                if (results == null || results.Count == 0)
+                    yield break;
+
+                foreach (SearchResult sr in results)
+                {
+                    RootKey rk = null;
+                    try
+                    {
+                        rk = new RootKey(sr);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"WARNING: {sr.Properties["distinguishedName"][0]}: {ex.Message}");
+                    }
+
+                    if (rk != null)
+                        yield return rk;
+                }
+            }
+        }
+
+        protected byte[] Serialize()
         {
             int trackSize = 36;
             long rootKeySize = 124 + Encoding.Unicode.GetByteCount(msKdsKDFAlgorithmID) + msKdsKDFParam.Length + KdsSecretAgreementParam.Length
@@ -261,23 +310,7 @@ namespace GoldenGMSA
         }
 
 
-        public static RootKey GetRootKeyByGuid(string forestName, Guid rootKeyId)
-        {
-            using (var rootDse = Utils.GetRootDse(forestName))
-            {
-                string searchBase = rootDse.Properties["configurationNamingContext"].Value.ToString();
-                string ldapFilter = $"(&(objectClass=msKds-ProvRootKey)(cn={rootKeyId}))";
 
-                //Console.WriteLine($"searchBase={searchBase}; ldapFilter={ldapFilter}");
-
-                var results = Utils.FindInConfigPartition(forestName, ldapFilter, KdsRootKeyAttributes);
-
-                if (results == null || results.Count == 0)
-                    return null;
-
-                return new RootKey(results[0]);
-            }
-        }
 
         // TODO: cleanup
         public static void Export(SearchResult result, string path)
@@ -302,6 +335,15 @@ namespace GoldenGMSA
         public string ToBase64String()
         {
             return Convert.ToBase64String(this.Serialize());
+        }
+
+        public override string ToString()
+        {
+            string result = $"Guid:\t\t{this.cn}{Environment.NewLine}";
+            result += $"Base64 blob:\t{this.ToBase64String()}{Environment.NewLine}";
+            result += $"----------------------------------------------{Environment.NewLine}";
+
+            return result;
         }
     }
 }

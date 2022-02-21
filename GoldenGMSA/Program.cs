@@ -15,8 +15,7 @@ namespace GoldenGMSA
         {
             var parser = new Parser();
 
-            var parserResult = parser.ParseArguments<
-                GmsaInfoOptions, KdsInfoOptions>(args);
+            var parserResult = parser.ParseArguments<GmsaInfoOptions, KdsInfoOptions, ComputePwdOptions>(args);
 
             parserResult
                 .WithParsed<GmsaInfoOptions>(options => ProcessGmsaInfoOptions(options))
@@ -79,14 +78,22 @@ namespace GoldenGMSA
         {
             try
             {
-                if (options.KdsKeyGuid == Guid.Empty)
-                    throw new ArgumentOutOfRangeException(nameof(options.KdsKeyGuid));
-
                 string forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
 
-                var rootKey = RootKey.GetRootKeyByGuid(forestName, options.KdsKeyGuid);
+                if (options.KdsKeyGuid.HasValue)
+                {
+                    var rootKey = RootKey.GetRootKeyByGuid(forestName, options.KdsKeyGuid.Value);
+                    Console.WriteLine(rootKey.ToString());
+                }
+                else
+                {
+                    var rootKeys = RootKey.GetAllRootKeys(forestName);
 
-                Console.WriteLine(rootKey.ToBase64String());
+                    foreach (var rootKey in rootKeys)
+                    {
+                        Console.WriteLine(rootKey.ToString());
+                    }                    
+                }
             }
             catch (Exception ex)
             {
@@ -125,7 +132,7 @@ namespace GoldenGMSA
                     pwdId = new MsdsManagedPasswordId(pwdIdBytes);
                 }
 
-                if (!string.IsNullOrEmpty(options.KdsRootKeyBase64))
+                if (string.IsNullOrEmpty(options.KdsRootKeyBase64))
                 {
                     rootKey = RootKey.GetRootKeyByGuid(forestName, pwdId.RootKeyIdentifier);
                 }
@@ -137,12 +144,12 @@ namespace GoldenGMSA
 
                 var pwdBytes = GmsaPassword.GetPassword(options.Sid, rootKey, pwdId, domainName, forestName);
 
-                Console.WriteLine(Convert.ToBase64String(pwdBytes));
+                Console.WriteLine($"{Convert.ToBase64String(pwdBytes)}");
             }
             catch (Exception ex)
             {
 
-                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"ERROR: {ex}");
             }
         }
     }
@@ -176,8 +183,8 @@ namespace GoldenGMSA
     [Verb("kdsinfo", HelpText = "Query KDS Root Keys information")]
     class KdsInfoOptions
     {
-        [Option('g', "guid", Required = true, HelpText = "The GUID of the KDS Root Key object")]
-        public Guid KdsKeyGuid { get; set; }
+        [Option('g', "guid", Required = false, HelpText = "The GUID of the KDS Root Key object")]
+        public Guid? KdsKeyGuid { get; set; }
 
         [Usage]
         public static IEnumerable<Example> Examples
