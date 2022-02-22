@@ -40,6 +40,7 @@ namespace GoldenGMSA
 
         static void ProcessGmsaInfoOptions(GmsaInfoOptions options)
         {
+            Console.WriteLine();
             try
             {
                 string domainName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Name;
@@ -76,6 +77,7 @@ namespace GoldenGMSA
 
         static void ProcessKdsInfoOptions(KdsInfoOptions options)
         {
+            Console.WriteLine();
             try
             {
                 string forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
@@ -103,6 +105,7 @@ namespace GoldenGMSA
 
         static void ProcessComputePwdOptions(ComputePwdOptions options)
         {
+            Console.WriteLine();
             try
             {
                 string domainName = "", forestName = "";
@@ -144,7 +147,7 @@ namespace GoldenGMSA
 
                 var pwdBytes = GmsaPassword.GetPassword(options.Sid, rootKey, pwdId, domainName, forestName);
 
-                Console.WriteLine($"{Convert.ToBase64String(pwdBytes)}");
+                Console.WriteLine($"Base64 Encoded Password:\t{Convert.ToBase64String(pwdBytes)}");
             }
             catch (Exception ex)
             {
