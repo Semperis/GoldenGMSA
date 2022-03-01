@@ -71,7 +71,6 @@ namespace GoldenGMSA
             {
                 Console.WriteLine($"ERROR: {ex.Message}");
             }
-
         }
 
         static void ProcessKdsInfoOptions(KdsInfoOptions options)
@@ -83,7 +82,11 @@ namespace GoldenGMSA
                 if (options.KdsKeyGuid.HasValue)
                 {
                     var rootKey = RootKey.GetRootKeyByGuid(forestName, options.KdsKeyGuid.Value);
-                    Console.WriteLine(rootKey.ToString());
+
+                    if (rootKey == null)
+                        Console.WriteLine($"KDS Root Key with ID {options.KdsKeyGuid.Value} not found");
+                    else
+                        Console.WriteLine(rootKey.ToString());
                 }
                 else
                 {
@@ -140,6 +143,12 @@ namespace GoldenGMSA
                 {
                     var rootKeyBytes = Convert.FromBase64String(options.KdsRootKeyBase64);
                     rootKey = new RootKey(rootKeyBytes);
+                }
+
+                if (rootKey == null)
+                {
+                    Console.WriteLine($"Failed to locate KDS Root Key with ID {pwdId.RootKeyIdentifier}");
+                    return;
                 }
 
                 var pwdBytes = GmsaPassword.GetPassword(options.Sid, rootKey, pwdId, domainName, forestName);

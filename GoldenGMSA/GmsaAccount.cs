@@ -120,9 +120,9 @@ namespace GoldenGMSA
 
         public override string ToString()
         {
-            string result = $"SamAccountName:\t\t{this.SamAccountName}{Environment.NewLine}";
-            result += $"SID:\t\t\t{this.Sid}{Environment.NewLine}";
-            result += $"RootKeyGuid:\t\t{this.ManagedPasswordId.RootKeyIdentifier}{Environment.NewLine}";
+            string result = $"sAMAccountName:\t\t{this.SamAccountName}{Environment.NewLine}";
+            result += $"objectSid:\t\t\t{this.Sid}{Environment.NewLine}";
+            result += $"rootKeyGuid:\t\t{this.ManagedPasswordId.RootKeyIdentifier}{Environment.NewLine}";
             result += $"msds-ManagedPasswordID:\t{Convert.ToBase64String(this.ManagedPasswordId.MsdsManagedPasswordIdBytes)}{Environment.NewLine}";
             result += $"----------------------------------------------{Environment.NewLine}";
             
