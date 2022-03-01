@@ -9,3 +9,10 @@ updates:
     directory: "/GoldenGMSA" # Location of package manifests
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "Costura.Fody"
+        # For Costura.Fody, ignore all updates for version 4
+        versions: ["4.x"]
+      - dependency-name: "Fody"
+        # For Fody, ignore all updates for version 6
+        versions: ["6.x"]        
