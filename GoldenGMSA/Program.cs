@@ -43,7 +43,16 @@ namespace GoldenGMSA
             Console.WriteLine();
             try
             {
-                string domainName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Name;
+                string domainName = null;
+
+                if (string.IsNullOrEmpty(options.DomainName))
+                {
+                    domainName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Name;
+                }
+                else
+                {
+                    domainName = options.DomainName;
+                }
 
                 if (options.Sid != null)
                 {
@@ -79,7 +88,16 @@ namespace GoldenGMSA
             Console.WriteLine();
             try
             {
-                string forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
+                string forestName = null;
+
+                if (string.IsNullOrEmpty(options.ForestName))
+                {
+                    forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
+                }
+                else
+                {
+                    forestName = options.ForestName;
+                }
 
                 if (options.KdsKeyGuid.HasValue)
                 {
@@ -97,7 +115,7 @@ namespace GoldenGMSA
                     foreach (var rootKey in rootKeys)
                     {
                         Console.WriteLine(rootKey.ToString());
-                    }                    
+                    }
                 }
             }
             catch (Exception ex)
@@ -116,13 +134,30 @@ namespace GoldenGMSA
                 if (options.Sid == null)
                     throw new ArgumentNullException(nameof(options.Sid));
 
-                if (string.IsNullOrEmpty(options.KdsRootKeyBase64) || string.IsNullOrEmpty(options.ManagedPwdIdBase64))
+                if (string.IsNullOrEmpty(options.ForestName))
                 {
-                    using (var currDomain = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain())
+                    forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
+                }
+                else
+                {
+                    forestName = options.ForestName;
+                }
+
+                if (string.IsNullOrEmpty(options.DomainName))
+                {
+                    if (string.IsNullOrEmpty(forestName))
                     {
-                        domainName = currDomain.Name;
-                        forestName = currDomain.Forest.Name;
+                        domainName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Name;
                     }
+                    else
+                    {
+                        domainName = forestName;
+                    }
+
+                }
+                else
+                {
+                    domainName = options.DomainName;
                 }
 
                 MsdsManagedPasswordId pwdId = null;
@@ -172,6 +207,9 @@ namespace GoldenGMSA
         [Option('s', "sid", Required = false, HelpText = "The SID of the object to query")]
         public SecurityIdentifier Sid { get; set; }
 
+        [Option('d', "domain", Required = false, HelpText = "Domain/DC to query for gMSA object")]
+        public string DomainName { get; set; }
+
         [Usage]
         public static IEnumerable<Example> Examples
         {
@@ -197,6 +235,9 @@ namespace GoldenGMSA
     {
         [Option('g', "guid", Required = false, HelpText = "The GUID of the KDS Root Key object")]
         public Guid? KdsKeyGuid { get; set; }
+
+        [Option('f', "forest", Required = false, HelpText = "Forest/domain to query for the KDS Root Key Object")]
+        public string ForestName { get; set; }
 
         [Usage]
         public static IEnumerable<Example> Examples
@@ -224,6 +265,12 @@ namespace GoldenGMSA
 
         [Option('p', "pwdid", Required = false, Default = null, HelpText = "Base64 of msds-ManagedPasswordID attribute value")]
         public string ManagedPwdIdBase64 { get; set; }
+
+        [Option('d', "domain", Required = false, Default = null, HelpText = "Domain/DC to query for gMSA object")]
+        public string DomainName { get; set; }
+
+        [Option('f', "forest", Required = false, Default = null, HelpText = "Forest/domain to query for the KDS Root Key Object")]
+        public string ForestName { get; set; }
 
         [Usage]
         public static IEnumerable<Example> Examples
