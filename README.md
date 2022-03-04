@@ -6,6 +6,25 @@ This tool is based on research by Yuval Gordon ([@YuG0rd](https://twitter.com/Yu
 
 More details are available at the post [Introducing the Golden GMSA Attack](https://www.semperis.com/blog/golden-gmsa-attack/).
 
+## Detecting a Golden GMSA attack
+The compromise of a KDS root key does not generate security events by default. Defenders should configure a SACL on the KDS root key objects for everyone reading the msKds-RootKeyData attribute. Once the system access control list (SACL) is configured, any attempt to dump the key data of a KDS root key will generate security event 4662 on the DC where the object type is msKds-ProvRootKey and the account name is not a DC (although it can be), as demonstrated in the following screenshot:
+
+![image](https://user-images.githubusercontent.com/2473497/156802143-6c5b0935-45bb-4a28-b01e-ccb5f8ff88b0.png)
+
+The SACL can be placed on the Master Root Keys container and inherited to all msKds-ProvRootKey objects. A SACL should also be added to audit SACL changes to the Master Root Keys container and msKds-ProvRootKey objects.
+
+## Detecting a cross trust Golden GMSA attack
+The compromise of a KDS root key is not visible from a trusting domain. Defenders should there configure a SACL on the gMSA for everyone reading the msDS-ManagedPasswordId attribute. Once the system access control list (SACL) is configured, any attempt to read the attribute required for an attack will generate security event 4662 on the DC where the object type is msDS-GroupManagedServiceAccount, the property read is msDS-ManagedPasswordId {0e78295a-c6d3-0a40-b491-d62251ffa0a6}, and the account is not from the gMSA's own domain, as demonstrated in the following screenshot:
+
+![image](https://user-images.githubusercontent.com/2473497/156807135-3f1abdbd-fb19-4393-8d77-03f1bdf8f784.png)
+
+The SACL can be placed on the Managed Service Accounts container and inherited to all msDS-GroupManagedServiceAccount objects.
+
+## Defending against Golden GMSA attacks
+Group Managed Service Accounts are a great Active Directory feature that mitigates some risks associated with service accounts, such as Kerberoasting attacks. However, the passwords associated with gMSAs are generated using inputs that cannot be rotated if compromised, allowing attackers with high privileges to dump KDS root keys and generate the passwords of the associated gMSAs offline for as long as they exist. 
+
+Defenders should monitor abnormal access to KDS root keys, such as non DCs reading the msKds-ProvRootKey attribute and abnormal logon events linked to gMSA accounts. 
+
 ## Usage
 
 ![image](images/usage.png)
