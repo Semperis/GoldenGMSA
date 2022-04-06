@@ -134,30 +134,28 @@ namespace GoldenGMSA
                 if (options.Sid == null)
                     throw new ArgumentNullException(nameof(options.Sid));
 
-                if (string.IsNullOrEmpty(options.ForestName))
+                // If we will run online mode
+                if (string.IsNullOrEmpty(options.KdsRootKeyBase64) || string.IsNullOrEmpty(options.ManagedPwdIdBase64))
                 {
-                    forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
-                }
-                else
-                {
-                    forestName = options.ForestName;
-                }
+                    // If we need to automatically get forest name
+                    if (string.IsNullOrEmpty(options.ForestName))
+                    {
+                        forestName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Forest.Name;
+                    }
+                    else
+                    {
+                        forestName = options.ForestName;
+                    }
 
-                if (string.IsNullOrEmpty(options.DomainName))
-                {
-                    if (string.IsNullOrEmpty(forestName))
+                    // If we need to automatically get domain name
+                    if (string.IsNullOrEmpty(options.DomainName))
                     {
                         domainName = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().Name;
                     }
                     else
                     {
-                        domainName = forestName;
+                        domainName = options.DomainName;
                     }
-
-                }
-                else
-                {
-                    domainName = options.DomainName;
                 }
 
                 MsdsManagedPasswordId pwdId = null;
