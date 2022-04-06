@@ -179,3 +179,4 @@ Example:
 
 ## References
  - https://www.semperis.com/blog/golden-gmsa-attack/
+ - https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent
