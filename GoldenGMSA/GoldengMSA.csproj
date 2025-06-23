@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="../packages/Costura.Fody.6.0.0/build/Costura.Fody.props" Condition="Exists('../packages/Costura.Fody.6.0.0/build/Costura.Fody.props')" />
   <Import Project="..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -77,8 +78,9 @@
     <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
     </Reference>
-    <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
+    <Reference Include="Costura, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d">
+      <HintPath>..\packages\Costura.Fody.6.0.0\lib\netstandard2.0\Costura.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -135,5 +137,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Fody.6.0.0\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.0.0\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props'))" />
+    <Error Condition="!Exists('../packages/Fody.6.9.2/build/Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '../packages/Fody.6.9.2/build/Fody.targets'))" />
+    <Error Condition="!Exists('../packages/Costura.Fody.6.0.0/build/Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '../packages/Costura.Fody.6.0.0/build/Costura.Fody.props'))" />
+    <Error Condition="!Exists('../packages/Costura.Fody.6.0.0/build/Costura.Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '../packages/Costura.Fody.6.0.0/build/Costura.Fody.targets'))" />
   </Target>
+  <Import Project="../packages/Fody.6.9.2/build/Fody.targets" Condition="Exists('../packages/Fody.6.9.2/build/Fody.targets')" />
+  <Import Project="../packages/Costura.Fody.6.0.0/build/Costura.Fody.targets" Condition="Exists('../packages/Costura.Fody.6.0.0/build/Costura.Fody.targets')" />
 </Project>
